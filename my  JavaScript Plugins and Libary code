@@ -1,0 +1,109 @@
+class SimpleModal {
+    constructor(options = {}) {
+        this.settings = {
+            width: options.width '400px',
+            height: options.height '200px',
+            backgroundColor: options.backgroundColor '#fff',
+            textColor: options.textColor '#000',
+            animationDuration: options.animationDuration '0.3s',
+            closeButton: options.closeButton !== undefined ? options.closeButton : true,
+            onClose: options.onClose null,
+        };
+
+        this.modal = null;
+        this.overlay = null;
+
+        this.createModal();
+    }
+
+    createModal() {
+        this.overlay = document.createElement('div');
+        this.overlay.style.position = 'fixed';
+        this.overlay.style.top = 0;
+        this.overlay.style.left = 0;
+        this.overlay.style.width = '100%';
+        this.overlay.style.height = '100%';
+        this.overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+        this.overlay.style.display = 'flex';
+        this.overlay.style.justifyContent = 'center';
+        this.overlay.style.alignItems = 'center';
+        this.overlay.style.zIndex = '1000';
+        this.overlay.style.opacity = '0';
+        this.overlay.style.transition = `opacity ${this.settings.animationDuration} ease`;
+
+        this.modal = document.createElement('div');
+        this.modal.style.width = this.settings.width;
+        this.modal.style.height = this.settings.height;
+        this.modal.style.backgroundColor = this.settings.backgroundColor;
+        this.modal.style.color = this.settings.textColor;
+        this.modal.style.padding = '20px';
+        this.modal.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
+        this.modal.style.position = 'relative';
+        this.modal.style.opacity = '0';
+        this.modal.style.transition = `opacity ${this.settings.animationDuration} ease`;
+
+        if (this.settings.closeButton) {
+            const closeButton = document.createElement('button');
+            closeButton.innerText = '×';
+            closeButton.style.position = 'absolute';
+            closeButton.style.top = '10px';
+            closeButton.style.right = '10px';
+            closeButton.style.background = 'none';
+            closeButton.style.border = 'none';
+            closeButton.style.fontSize = '18px';
+            closeButton.style.cursor = 'pointer';
+            closeButton.addEventListener('click', () => this.closeModal());
+            this.modal.appendChild(closeButton);
+        }
+
+        this.overlay.appendChild(this.modal);
+        document.body.appendChild(this.overlay);
+
+        requestAnimationFrame(() => {
+            this.overlay.style.opacity = '1';
+            this.modal.style.opacity = '1';
+        });
+    }
+
+    openModal(content = '') {
+        this.modal.innerHTML += content;
+        this.overlay.style.display = 'flex';
+    }
+
+    closeModal() {
+        this.modal.style.opacity = '0';
+        this.overlay.style.opacity = '0';
+
+        this.overlay.addEventListener('transitionend', () => {
+            this.overlay.style.display = 'none';
+            if (typeof this.settings.onClose === 'function') {
+                this.settings.onClose();
+            }
+        }, { once: true });
+    }
+
+    updateSettings(newSettings) {
+        Object.assign(this.settings, newSettings);
+        this.modal.style.width = this.settings.width;
+        this.modal.style.height = this.settings.height;                         
+        this.modal.style.backgroundColor = this.settings.backgroundColor;
+        this.modal.style.color = this.settings.textColor;
+    }
+}
+
+const modal = new SimpleModal({
+    width: '500px',
+    height: '300px',
+    backgroundColor: '#f9f9f9',
+    textColor: '#333',
+    animationDuration: '0.5s',
+    closeButton: true,
+    onClose: () => alert('Modal closed'),
+});
+
+modal.openModal('<h2>Hello World!</h2><p>This is a customizable modal dialog.</p>');
+
+modal.updateSettings({
+    width: '600px',
+    backgroundColor: '#fff',
+});
